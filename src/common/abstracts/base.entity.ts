@@ -8,9 +8,9 @@ export class BaseEntity {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @CreateDateColumn({ type: 'time with time zone' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'time with time zone' })
+  @UpdateDateColumn()
   updatedAt: Date;
 }

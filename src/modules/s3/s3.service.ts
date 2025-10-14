@@ -17,10 +17,10 @@ export class S3Service {
     });
   }
 
-  async uploadFile(file: Express.Multer.File, folderName: string) {
+  uploadFile(file: Express.Multer.File, folderName: string) {
     const ext = extname(file.originalname);
 
-    return await this.s3
+    return this.s3
       .upload({
         Bucket: process.env.S3_BUCKET_NAME,
         Key: `${folderName}/${Date.now()}${ext}`,

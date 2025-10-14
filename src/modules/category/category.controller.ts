@@ -7,6 +7,7 @@ import {
   MaxFileSizeValidator,
   Param,
   ParseFilePipe,
+  ParseIntPipe,
   Patch,
   Post,
   UploadedFile,
@@ -29,7 +30,7 @@ export class CategoryController {
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 1 }),
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }),
           new FileTypeValidator({ fileType: 'image/(png|jpeg|jpg|webp)' }),
         ],
       }),
@@ -38,11 +39,7 @@ export class CategoryController {
     @Body()
     createCategoryDto: CreateCategoryDto,
   ) {
-    return {
-      image,
-      createCategoryDto,
-    };
-    return this.categoryService.create(createCategoryDto);
+    return this.categoryService.create(createCategoryDto, image);
   }
 
   @Get()
@@ -51,8 +48,8 @@ export class CategoryController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.categoryService.findOneById(id);
   }
 
   @Patch(':id')
