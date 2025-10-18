@@ -7,9 +7,14 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryEntity } from './entities/category.entity';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { S3Service } from '../s3/s3.service';
 import { isBoolean, toBoolean } from '../../common/utils/functions.utils';
+import { PaginationDto } from '../../common/dtos/pagination.dto';
+import {
+  paginationGenerator,
+  paginationSolver,
+} from '../../common/utils/pagination.util';
 
 @Injectable()
 export class CategoryService {
@@ -23,7 +28,10 @@ export class CategoryService {
     createCategoryDto: CreateCategoryDto,
     image: Express.Multer.File,
   ) {
-    const { Location } = await this.s3Service.uploadFile(image, 'category');
+    const { Location, Key } = await this.s3Service.uploadFile(
+      image,
+      'category',
+    );
 
     let { title, slug, show, parentId } = createCategoryDto;
 
@@ -37,7 +45,7 @@ export class CategoryService {
 
     let parent: CategoryEntity | null = null;
 
-    if (parentId && !isNaN(parentId)) {
+    if (parentId && !isNaN(parseInt(parentId.toString()))) {
       parent = await this.findOneById(parentId);
     }
 
@@ -45,6 +53,7 @@ export class CategoryService {
       title,
       slug,
       image: Location,
+      imageKey: Key,
       show,
       parentId: parent?.id,
     });
@@ -54,7 +63,9 @@ export class CategoryService {
     };
   }
 
-  async findAll() {
+  async findAll(paginationDto: PaginationDto) {
+    const { page, limit, skip } = paginationSolver(paginationDto);
+
     const [categories, count] = await this.categoryRepository.findAndCount({
       relations: {
         parent: true,
@@ -64,13 +75,16 @@ export class CategoryService {
           title: true,
         },
       },
+      skip,
+      take: limit,
       order: {
-        createdAt: 'DESC',
+        id: 'DESC',
       },
     });
 
     return {
       categories,
+      pagination: paginationGenerator(count, page, limit),
     };
   }
 
@@ -86,11 +100,79 @@ export class CategoryService {
     return this.categoryRepository.findOneBy({ slug });
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(
+    id: number,
+    updateCategoryDto: UpdateCategoryDto,
+    image: Express.Multer.File,
+  ) {
+    const { title, slug, show, parentId } = updateCategoryDto;
+
+    const category = await this.findOneById(id);
+
+    const updateObject: DeepPartial<CategoryEntity> = {};
+
+    if (image) {
+      const { Location, Key } = await this.s3Service.uploadFile(
+        image,
+        'category',
+      );
+
+      if (Location) {
+        updateObject['image'] = Location;
+        updateObject['imageKey'] = Key;
+
+        if (category?.imageKey)
+          await this.s3Service.deleteFile(category?.imageKey);
+      }
+    }
+
+    if (title) updateObject['title'] = title;
+    if (show && isBoolean(show)) updateObject['show'] = toBoolean(show);
+
+    if (parentId && !isNaN(parseInt(parentId.toString()))) {
+      const parent = await this.findOneById(+parentId);
+      updateObject['parentId'] = parent?.id;
+    }
+
+    if (slug) {
+      const category = await this.findOneBySlug(slug);
+      if (category && category.id !== id)
+        throw new ConflictException('Category already exists');
+
+      updateObject['slug'] = slug;
+    }
+
+    await this.categoryRepository.update({ id }, updateObject);
+
+    return {
+      message: 'Category updated successfully',
+    };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: number) {
+    await this.findOneById(id);
+
+    await this.categoryRepository.delete({ id });
+
+    return {
+      message: 'Category deleted successfully',
+    };
+  }
+
+  async findBySlugWithChild(slug: string) {
+    const category = await this.categoryRepository.findOne({
+      where: {
+        slug,
+      },
+      relations: {
+        children: true,
+      },
+    });
+
+    if (!category) throw new NotFoundException('Category not found');
+
+    return {
+      category,
+    };
   }
 }

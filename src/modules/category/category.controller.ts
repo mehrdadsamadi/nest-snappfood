@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,13 +19,16 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { ApiConsumes } from '@nestjs/swagger';
 import { UploadFileS3 } from '../../common/interceptors/upload-file.interceptor';
+import { Pagination } from '../../common/decorators/pagination.decorator';
+import { PaginationDto } from '../../common/dtos/pagination.dto';
+import { SwaggerConsumes } from '../../common/enum/swagger-consumes.enum';
 
 @Controller('category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post()
-  @ApiConsumes('multipart/form-data')
+  @ApiConsumes(SwaggerConsumes.Multipart)
   @UseInterceptors(UploadFileS3('image'))
   create(
     @UploadedFile(
@@ -42,9 +46,15 @@ export class CategoryController {
     return this.categoryService.create(createCategoryDto, image);
   }
 
+  @Get('/by-slug-with-child/:slug')
+  findBySlugWithChild(@Param('slug') slug: string) {
+    return this.categoryService.findBySlugWithChild(slug);
+  }
+
   @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  @Pagination()
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.categoryService.findAll(paginationDto);
   }
 
   @Get(':id')
@@ -53,15 +63,26 @@ export class CategoryController {
   }
 
   @Patch(':id')
+  @ApiConsumes(SwaggerConsumes.Multipart)
+  @UseInterceptors(UploadFileS3('image'))
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }),
+          new FileTypeValidator({ fileType: 'image/(png|jpeg|jpg|webp)' }),
+        ],
+      }),
+    )
+    image: Express.Multer.File,
   ) {
-    return this.categoryService.update(+id, updateCategoryDto);
+    return this.categoryService.update(id, updateCategoryDto, image);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.categoryService.remove(id);
   }
 }
