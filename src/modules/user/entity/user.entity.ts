@@ -1,7 +1,8 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToMany, OneToOne } from 'typeorm';
 import { EntityNames } from '../../../common/enum/entity-names.enum';
 import { BaseEntity } from '../../../common/abstracts/base.entity';
 import { UserAddressEntity } from './address.entity';
+import { OtpEntity } from './otp.entity';
 
 @Entity(EntityNames.USER)
 export class UserEntity extends BaseEntity {
@@ -17,8 +18,11 @@ export class UserEntity extends BaseEntity {
   @Column({ unique: true, nullable: true })
   email: string;
 
-  @Column({ unique: true })
+  @Column({ unique: true, nullable: true })
   invite_code: string;
+
+  @Column({ default: false })
+  mobile_verified: boolean;
 
   @Column({ default: 0 })
   score: number;
@@ -28,4 +32,11 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => UserAddressEntity, (address) => address.user)
   addressList: UserAddressEntity[];
+
+  @Column({ nullable: true })
+  otpId: number;
+
+  @OneToOne(() => OtpEntity, (otp) => otp.user)
+  @JoinColumn({ name: 'otpId' })
+  otp: OtpEntity;
 }

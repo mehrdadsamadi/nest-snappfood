@@ -17,13 +17,14 @@ import {
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { ApiConsumes } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { UploadFileS3 } from '../../common/interceptors/upload-file.interceptor';
 import { Pagination } from '../../common/decorators/pagination.decorator';
 import { PaginationDto } from '../../common/dtos/pagination.dto';
 import { SwaggerConsumes } from '../../common/enum/swagger-consumes.enum';
 
 @Controller('category')
+@ApiTags('Category')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
