@@ -78,7 +78,7 @@ export class AuthService {
     }
 
     const { accessToken, refreshToken } = this.generateJwtTokens({
-      userId: user.id,
+      id: user.id,
     });
 
     return {
@@ -132,9 +132,9 @@ export class AuthService {
         secret: process.env.ACCESS_TOKEN_SECRET,
       });
 
-      if (typeof payload === 'object' && payload?.userId) {
+      if (typeof payload === 'object' && payload?.id) {
         const user = await this.userRepository.findOneBy({
-          id: payload.userId,
+          id: payload.id,
         });
 
         if (!user) {

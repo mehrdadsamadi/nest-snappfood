@@ -1,9 +1,9 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { UserEntity } from './user.entity';
+import { SupplierEntity } from './supplier.entity';
 import { EntityNames } from '../../../common/enum/entity-names.enum';
 
-@Entity(EntityNames.USER_OTP)
-export class OtpEntity {
+@Entity(EntityNames.SUPPLIER_OTP)
+export class SupplierOtpEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -14,8 +14,10 @@ export class OtpEntity {
   expires_in: Date;
 
   @Column()
-  userId: number;
+  supplierId: number;
 
-  @OneToOne(() => UserEntity, (user) => user.otp, { onDelete: 'CASCADE' })
-  user: UserEntity;
+  @OneToOne(() => SupplierEntity, (supplier) => supplier.otp, {
+    onDelete: 'CASCADE',
+  })
+  supplier: SupplierEntity;
 }

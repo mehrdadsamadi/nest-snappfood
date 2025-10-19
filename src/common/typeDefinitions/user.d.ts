@@ -1,9 +1,12 @@
-import { IUser } from 'src/modules/user/interface/user-request.interface';
+import { UserEntity } from '../../modules/user/entity/user.entity';
+import { SupplierEntity } from '../../modules/supplier/entities/supplier.entity';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: IUser;
+      user?: UserEntity | SupplierEntity;
     }
   }
 }
+
+export {};
