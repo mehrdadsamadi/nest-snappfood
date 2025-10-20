@@ -13,6 +13,9 @@ export class MenuEntity extends BaseEntity {
   @Column()
   image: string;
 
+  @Column({ nullable: true })
+  imageKey: string;
+
   @Column({ type: 'double' })
   price: number;
 
@@ -22,7 +25,7 @@ export class MenuEntity extends BaseEntity {
   @Column()
   description: string;
 
-  @Column({ type: 'double' })
+  @Column({ type: 'double', default: 0 })
   score: number;
 
   @Column()

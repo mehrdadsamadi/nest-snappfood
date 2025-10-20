@@ -141,7 +141,12 @@ export class AuthService {
           throw new UnauthorizedException('ابندا وارد حساب کاربری خود شوید.');
         }
 
-        return user;
+        return {
+          id: user.id,
+          first_name: user.first_name,
+          last_name: user.last_name,
+          mobile: user.mobile,
+        };
       }
 
       throw new UnauthorizedException('ابندا وارد حساب کاربری خود شوید.');

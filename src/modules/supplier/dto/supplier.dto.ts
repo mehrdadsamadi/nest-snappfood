@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
   IsIdentityCard,
@@ -26,7 +26,7 @@ export class SupplierSignupDto {
   @ApiProperty()
   city: string;
 
-  @ApiProperty()
+  @ApiPropertyOptional()
   invite_code: string;
 
   @ApiProperty()

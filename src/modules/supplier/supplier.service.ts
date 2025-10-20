@@ -30,16 +30,11 @@ export class SupplierService {
   constructor(
     @InjectRepository(SupplierEntity)
     private supplierRepository: Repository<SupplierEntity>,
-
     @InjectRepository(SupplierOtpEntity)
     private supplierOtpRepository: Repository<SupplierOtpEntity>,
-
     @Inject(REQUEST) private req: Request,
-
     private categoryService: CategoryService,
-
     private jwtService: JwtService,
-
     private s3Service: S3Service,
   ) {}
 
@@ -235,15 +230,20 @@ export class SupplierService {
       });
 
       if (typeof payload === 'object' && payload?.id) {
-        const user = await this.supplierRepository.findOneBy({
+        const supplier = await this.supplierRepository.findOneBy({
           id: payload.id,
         });
 
-        if (!user) {
+        if (!supplier) {
           throw new UnauthorizedException('ابندا وارد حساب کاربری خود شوید.');
         }
 
-        return user;
+        return {
+          id: supplier.id,
+          first_name: supplier.manager_name,
+          last_name: supplier.manager_family,
+          mobile: supplier.phone,
+        };
       }
 
       throw new UnauthorizedException('ابندا وارد حساب کاربری خود شوید.');
