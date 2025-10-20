@@ -3,6 +3,7 @@ import { EntityNames } from '../../../common/enum/entity-names.enum';
 import { BaseEntity } from '../../../common/abstracts/base.entity';
 import { UserAddressEntity } from './address.entity';
 import { OtpEntity } from './otp.entity';
+import { MenuFeedbackEntity } from '../../menu/entities/feedback.entity';
 
 @Entity(EntityNames.USER)
 export class UserEntity extends BaseEntity {
@@ -32,6 +33,9 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => UserAddressEntity, (address) => address.user)
   addressList: UserAddressEntity[];
+
+  @OneToMany(() => MenuFeedbackEntity, (feedback) => feedback.user)
+  feedbacks: MenuFeedbackEntity[];
 
   @Column({ nullable: true })
   otpId: number;

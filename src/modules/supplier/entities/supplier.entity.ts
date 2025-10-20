@@ -11,6 +11,8 @@ import { BaseEntity } from '../../../common/abstracts/base.entity';
 import { CategoryEntity } from '../../category/entities/category.entity';
 import { SupplierOtpEntity } from './otp.entity';
 import { SupplierStatus } from '../enum/status.enum';
+import { MenuTypeEntity } from '../../menu/entities/type.entity';
+import { MenuEntity } from '../../menu/entities/menu.entity';
 
 @Entity(EntityNames.SUPPLIER)
 export class SupplierEntity extends BaseEntity {
@@ -70,6 +72,12 @@ export class SupplierEntity extends BaseEntity {
 
   @OneToMany(() => SupplierEntity, (supplier) => supplier.agent)
   subsets: SupplierEntity[];
+
+  @OneToMany(() => MenuTypeEntity, (menuType) => menuType.supplier)
+  menuTypes: MenuTypeEntity[];
+
+  @OneToMany(() => MenuEntity, (menuType) => menuType.supplier)
+  menu: MenuEntity[];
 
   @Column({ nullable: true })
   otpId: number;
