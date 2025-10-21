@@ -1,6 +1,7 @@
 export enum EntityNames {
   USER = 'user',
   USER_ADDRESS = 'user_address',
+  USER_BASKET = 'user_basket',
   CATEGORY = 'category',
   SUPPLIER = 'supplier',
   USER_OTP = 'user_otp',
@@ -8,4 +9,5 @@ export enum EntityNames {
   MENU = 'menu',
   MENU_TYPE = 'menu_type',
   MENU_FEEDBACK = 'menu_feedback',
+  DISCOUNT = 'discount',
 }

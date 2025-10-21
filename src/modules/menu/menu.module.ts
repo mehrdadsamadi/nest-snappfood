@@ -18,5 +18,6 @@ import { SupplierModule } from '../supplier/supplier.module';
   ],
   controllers: [MenuController, MenuTypeController, MenuFeedbackController],
   providers: [MenuService, MenuTypeService, MenuFeedbackService],
+  exports: [MenuService, MenuTypeService, MenuFeedbackService, TypeOrmModule],
 })
 export class MenuModule {}

@@ -4,6 +4,7 @@ import { EntityNames } from '../../../common/enum/entity-names.enum';
 import { SupplierEntity } from '../../supplier/entities/supplier.entity';
 import { MenuTypeEntity } from './type.entity';
 import { MenuFeedbackEntity } from './feedback.entity';
+import { UserBasketEntity } from '../../basket/entity/basket.entity';
 
 @Entity(EntityNames.MENU)
 export class MenuEntity extends BaseEntity {
@@ -44,4 +45,7 @@ export class MenuEntity extends BaseEntity {
 
   @OneToMany(() => MenuFeedbackEntity, (score) => score.food)
   feedbacks: MenuFeedbackEntity[];
+
+  @OneToMany(() => UserBasketEntity, (basket) => basket.food)
+  baskets: UserBasketEntity[];
 }

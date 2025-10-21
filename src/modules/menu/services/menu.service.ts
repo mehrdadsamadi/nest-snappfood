@@ -4,7 +4,7 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MenuEntity } from '../entities/menu.entity';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { MenuTypeService } from './type.service';
 import { S3Service } from '../../s3/s3.service';
 import { MenuTypeEntity } from '../entities/type.entity';
@@ -59,7 +59,7 @@ export class MenuService {
 
     const menu = await this.findOneById(id);
 
-    const updateObject: Partial<MenuEntity> = {};
+    const updateObject: DeepPartial<MenuEntity> = {};
 
     if (image) {
       const { Location, Key } = await this.s3Service.uploadFile(
@@ -143,9 +143,7 @@ export class MenuService {
   }
 
   async checkExist(id: number) {
-    const { id: supplierId } = this.req.user!;
-
-    const item = await this.menuRepository.findOneBy({ id, supplierId });
+    const item = await this.menuRepository.findOneBy({ id });
     if (!item) throw new NotFoundException('Menu not found');
 
     return item;
