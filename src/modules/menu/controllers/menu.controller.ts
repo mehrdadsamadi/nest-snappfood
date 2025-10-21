@@ -1,12 +1,14 @@
 import {
   Body,
   Controller,
+  Delete,
   FileTypeValidator,
   Get,
   MaxFileSizeValidator,
   Param,
   ParseFilePipe,
   ParseIntPipe,
+  Patch,
   Post,
   UploadedFile,
   UseInterceptors,
@@ -18,6 +20,7 @@ import { UploadFileS3 } from '../../../common/interceptors/upload-file.intercept
 import { SupplierAuth } from '../../../common/decorators/auth.decorator';
 import { CreateMenuDto } from '../dto/create-menu.dto';
 import { SkipAuth } from '../../../common/decorators/skip-auth.decorator';
+import { UpdateMenuDto } from '../dto/update-menu.dto';
 
 @Controller('menu')
 @ApiTags('Menu')
@@ -44,9 +47,38 @@ export class MenuController {
     return this.menuService.create(createMenuDto, image);
   }
 
+  @Patch(':id')
+  @ApiConsumes(SwaggerConsumes.Multipart)
+  @UseInterceptors(UploadFileS3('image'))
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateMenuDto: UpdateMenuDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 10 }),
+          new FileTypeValidator({ fileType: 'image/(png|jpeg|jpg|webp)' }),
+        ],
+      }),
+    )
+    image: Express.Multer.File,
+  ) {
+    return this.menuService.update(id, updateMenuDto, image);
+  }
+
   @Get('/get-menu-by-supplierId/:supplierId')
   @SkipAuth()
   findAll(@Param('supplierId', ParseIntPipe) supplierId: number) {
     return this.menuService.findAll(supplierId);
+  }
+
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.menuService.findOneById(id);
+  }
+
+  @Delete(':id')
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.menuService.delete(id);
   }
 }
