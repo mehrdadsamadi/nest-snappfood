@@ -23,6 +23,9 @@ export class MenuEntity extends BaseEntity {
   @Column({ type: 'double', default: 0 })
   discount: number;
 
+  @Column({ default: false })
+  is_active_discount: boolean;
+
   @Column()
   description: string;
 

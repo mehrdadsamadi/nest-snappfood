@@ -105,7 +105,7 @@ export class BasketService {
       throw new BadRequestException('discount is expired');
     }
 
-    const userBasketDiscount = await this.userBasketRepository.findBy({
+    const userBasketDiscount = await this.userBasketRepository.findOneBy({
       discountId: discount.id,
       userId,
     });
@@ -169,10 +169,12 @@ export class BasketService {
       }
     }
 
-    await this.userBasketRepository.insert({
-      discountId: discount.id,
-      userId,
-    });
+    await this.userBasketRepository.update(
+      { userId },
+      {
+        discountId: discount.id,
+      },
+    );
 
     return {
       message: 'discount added to basket successfully',
@@ -201,5 +203,127 @@ export class BasketService {
     };
   }
 
-  async getBasket() {}
+  async getBasket() {
+    const { id: userId } = this.req.user!;
+
+    const basketItems = await this.userBasketRepository.find({
+      where: {
+        userId,
+      },
+      relations: {
+        discount: true,
+        food: {
+          supplier: true,
+        },
+      },
+    });
+
+    const foods = basketItems.filter((item) => item.foodId);
+    const supplierDiscounts = basketItems.filter(
+      (item) => item?.discount?.supplierId,
+    );
+    const generalDiscounts = basketItems.find(
+      (item) => item?.discount?.id && !item?.discount?.supplierId,
+    );
+
+    let totalAmount = 0;
+    let paymentAmount = 0;
+    let totalDiscount = 0;
+    const foodList: any[] = [];
+
+    for (const item of foods) {
+      let discount = 0;
+      let discountCode: string | null = null;
+
+      const { food, count } = item;
+
+      totalAmount += food.price * count;
+
+      const supplierId = food.supplierId;
+      let foodPrice = food.price * count;
+
+      if (food.is_active_discount && food.discount > 0) {
+        discount += foodPrice * (food.discount / 100);
+        foodPrice -= discount;
+      }
+
+      const discountItem = supplierDiscounts.find(
+        ({ discount }) => discount.supplierId === supplierId,
+      );
+
+      if (discountItem) {
+        const { active, amount, percent, limit, usage, code } =
+          discountItem.discount;
+
+        if (active) {
+          if (!limit || limit > usage) {
+            discountCode = code;
+
+            if (percent && percent > 0) {
+              discount += foodPrice * (percent / 100);
+              foodPrice -= discount;
+            } else if (amount && amount > 0) {
+              discount += amount;
+              foodPrice = amount > foodPrice ? 0 : foodPrice - amount;
+            }
+          }
+        }
+      }
+
+      paymentAmount += foodPrice;
+      totalDiscount += discount;
+
+      foodList.push({
+        name: food.name,
+        description: food.description,
+        count,
+        image: food.image,
+        price: food.price,
+        total_amount: food.price * count,
+        discount,
+        payment_amount: food.price * count - discount,
+        discountCode,
+        supplierId,
+        supplierName: food?.supplier?.store_name,
+        supplierImage: food?.supplier?.image,
+      });
+    }
+
+    let generalDiscountDetail = {};
+    if (generalDiscounts?.discount?.active) {
+      const { discount } = generalDiscounts;
+
+      if (
+        !discount?.limit ||
+        (discount?.limit && discount?.limit > discount?.usage)
+      ) {
+        let discountAmount = 0;
+
+        if (discount.percent > 0) {
+          discountAmount = paymentAmount * (discount.percent / 100);
+        } else if (discount.amount > 0) {
+          discountAmount = discount.amount;
+        }
+
+        paymentAmount =
+          discountAmount > paymentAmount ? 0 : paymentAmount - discountAmount;
+        totalDiscount += discountAmount;
+
+        generalDiscountDetail = {
+          code: discount.code,
+          percent: discount.percent,
+          amount: discount.amount,
+          discount_amount: discountAmount,
+        };
+      }
+    }
+
+    return {
+      foods: foodList,
+      total_amount: totalAmount,
+      total_discount: totalDiscount,
+      general_discount: generalDiscountDetail,
+      payment_amount: paymentAmount,
+    };
+  }
 }

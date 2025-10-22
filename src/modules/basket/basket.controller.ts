@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post } from '@nestjs/common';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { BasketService } from './basket.service';
 import { BasketDto, DiscountBasketDto } from './dto/basket.dto';
@@ -33,5 +33,10 @@ export class BasketController {
   @ApiConsumes(SwaggerConsumes.UrlEncoded, SwaggerConsumes.Json)
   removeDiscountFromBasket(@Body() basketDto: DiscountBasketDto) {
     return this.basketService.removeDiscount(basketDto);
+  }
+
+  @Get()
+  getBasket() {
+    return this.basketService.getBasket();
   }
 }
