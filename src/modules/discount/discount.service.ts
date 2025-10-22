@@ -53,6 +53,13 @@ export class DiscountService {
     if (discount) throw new ConflictException('Discount code already exists');
   }
 
+  async findOneByCode(code: string) {
+    const discount = await this.discountRepository.findOneBy({ code });
+    if (!discount) throw new NotFoundException('Discount code not found');
+
+    return discount;
+  }
+
   findAll() {
     return this.discountRepository.find({});
   }
