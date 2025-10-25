@@ -9,6 +9,9 @@ import { SupplierModule } from '../supplier/supplier.module';
 import { MenuModule } from '../menu/menu.module';
 import { DiscountModule } from '../discount/discount.module';
 import { BasketModule } from '../basket/basket.module';
+import { PaymentModule } from '../payment/payment.module';
+import { OrderModule } from '../order/order.module';
+import { HttpApiModule } from '../http/http.module';
 
 @Module({
   imports: [
@@ -23,6 +26,9 @@ import { BasketModule } from '../basket/basket.module';
     MenuModule,
     DiscountModule,
     BasketModule,
+    PaymentModule,
+    OrderModule,
+    HttpApiModule,
   ],
   controllers: [],
   providers: [],

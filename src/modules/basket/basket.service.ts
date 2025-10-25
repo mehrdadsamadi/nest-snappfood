@@ -274,6 +274,7 @@ export class BasketService {
       totalDiscount += discount;
 
       foodList.push({
+        foodId: food.id,
         name: food.name,
         description: food.description,
         count,

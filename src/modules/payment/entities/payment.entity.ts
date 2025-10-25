@@ -15,6 +15,9 @@ export class PaymentEntity extends BaseEntity {
   @Column()
   invoice_number: string;
 
+  @Column({ nullable: true })
+  authority: string;
+
   @Column()
   userId: number;
 

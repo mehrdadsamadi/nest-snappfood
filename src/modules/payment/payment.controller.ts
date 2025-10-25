@@ -1,34 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { CreatePaymentDto } from './dto/create-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { UserAuth } from '../../common/decorators/auth.decorator';
+import { PaymentGatewayDto } from './dto/payment.dto';
+import { Response } from 'express';
 
 @Controller('payment')
+@ApiTags('Payment')
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return this.paymentService.create(createPaymentDto);
+  @UserAuth()
+  gatewayUrl(@Body() paymentDto: PaymentGatewayDto) {
+    return this.paymentService.getGatewayUrl(paymentDto);
   }
 
-  @Get()
-  findAll() {
-    return this.paymentService.findAll();
-  }
+  @Get('/verify')
+  async verifyPayment(
+    @Query('Authority') authority: string,
+    @Query('Status') status: string,
+    @Res() res: Response,
+  ) {
+    const url = await this.paymentService.verify(authority, status);
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.paymentService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePaymentDto: UpdatePaymentDto) {
-    return this.paymentService.update(+id, updatePaymentDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.paymentService.remove(+id);
+    return res.redirect(url);
   }
 }

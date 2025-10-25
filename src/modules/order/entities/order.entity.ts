@@ -12,7 +12,7 @@ export class OrderEntity extends BaseEntity {
   @Column()
   userId: number;
 
-  @Column()
+  @Column({ nullable: true })
   addressId: number;
 
   @Column()
