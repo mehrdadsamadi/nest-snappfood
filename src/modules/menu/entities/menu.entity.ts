@@ -5,6 +5,7 @@ import { SupplierEntity } from '../../supplier/entities/supplier.entity';
 import { MenuTypeEntity } from './type.entity';
 import { MenuFeedbackEntity } from './feedback.entity';
 import { UserBasketEntity } from '../../basket/entity/basket.entity';
+import { OrderItemEntity } from '../../order/entities/order-item.entity';
 
 @Entity(EntityNames.MENU)
 export class MenuEntity extends BaseEntity {
@@ -45,6 +46,9 @@ export class MenuEntity extends BaseEntity {
 
   @ManyToOne(() => MenuTypeEntity, (type) => type.items)
   type: MenuTypeEntity;
+
+  @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.food)
+  orders: OrderItemEntity[];
 
   @OneToMany(() => MenuFeedbackEntity, (score) => score.food)
   feedbacks: MenuFeedbackEntity[];

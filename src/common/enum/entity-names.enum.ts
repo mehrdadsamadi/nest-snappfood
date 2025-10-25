@@ -10,4 +10,7 @@ export enum EntityNames {
   MENU_TYPE = 'menu_type',
   MENU_FEEDBACK = 'menu_feedback',
   DISCOUNT = 'discount',
+  ORDER = 'order',
+  ORDER_ITEM = 'order_item',
+  PAYMENT = 'payment',
 }
